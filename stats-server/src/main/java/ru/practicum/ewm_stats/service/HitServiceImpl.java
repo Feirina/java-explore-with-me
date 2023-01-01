@@ -40,13 +40,13 @@ public class HitServiceImpl implements HitService {
         } else {
             hits = hitRepository.findAllByTimestampBetween(startDate, endDate)
                     .stream()
-                    .map(HitMapper :: toViewStats)
+                    .map(HitMapper::toViewStats)
                     .peek(viewStats -> viewStats.setHits(countViewsByUri(viewStats.getUri())))
                     .collect(Collectors.toList());
         }
         return uris == null ? hits : hits.stream()
                 .map(viewStats -> filterByUris(viewStats, uris))
-                .filter(Objects :: nonNull)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
