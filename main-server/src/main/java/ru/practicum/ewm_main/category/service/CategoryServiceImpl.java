@@ -24,9 +24,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
-        return categoryRepository.findAll(PageRequest.of(from/size, size))
+        return categoryRepository.findAll(PageRequest.of(from / size, size))
                 .stream()
-                .map(CategoryMapper :: toCategoryDto)
+                .map(CategoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
     }
 
@@ -54,6 +54,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private Category getAndCheckCategory(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Category with id = " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Category with id = " + id + " not found"));
     }
 }

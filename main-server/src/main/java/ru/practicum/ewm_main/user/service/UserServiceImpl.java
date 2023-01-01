@@ -25,14 +25,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
         if (ids.isEmpty()) {
-            return userRepository.findAll(PageRequest.of(from/size, size))
+            return userRepository.findAll(PageRequest.of(from / size, size))
                     .stream()
-                    .map(UserMapper :: toUserDto)
+                    .map(UserMapper::toUserDto)
                     .collect(Collectors.toList());
         }
-        return userRepository.findAllByIdIn(ids, PageRequest.of(from/size, size))
+        return userRepository.findAllByIdIn(ids, PageRequest.of(from / size, size))
                 .stream()
-                .map(UserMapper :: toUserDto)
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -48,6 +48,6 @@ public class UserServiceImpl implements UserService {
 
     private User checkAndGetUser(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("User with id = " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("User with id = " + id + " not found"));
     }
 }

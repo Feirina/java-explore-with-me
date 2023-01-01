@@ -37,11 +37,11 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
-        return compilationRepository.findAllByPinned(pinned, PageRequest.of(from/size, size))
+        return compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size))
                 .stream()
-                .map(CompilationMapper :: toCompilationDto)
+                .map(CompilationMapper::toCompilationDto)
                 .map(this::setViewsAndConfirmedRequests)
-                .collect(Collectors.toList()); //добавить просмотры и реквесты во все методы, возвращающие дто
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -104,9 +104,10 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private CompilationDto setViewsAndConfirmedRequests(CompilationDto compilationDto) {
-        compilationDto.getEvents()
+        compilationDto.setEvents(compilationDto.getEvents()
                 .stream()
-                .map(this :: setViewsAndConfirmedRequests);
+                .map(this::setViewsAndConfirmedRequests)
+                .collect(Collectors.toList()));
         return compilationDto;
     }
 
@@ -117,6 +118,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     private Compilation getAndCheckCompilation(Long id) {
         return compilationRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("compilation with id = " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("compilation with id = " + id + " not found"));
     }
 }

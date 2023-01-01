@@ -39,7 +39,7 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .orElseThrow(() -> new NotFoundException("user with id = " + userId + " not found"));
         return participationRepository.findAllByRequester(user)
                 .stream()
-                .map(ParticipationMapper :: toParticipationDto)
+                .map(ParticipationMapper::toParticipationDto)
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +93,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         }
         return participationRepository.findAllByEventId(eventId)
                 .stream()
-                .map(ParticipationMapper :: toParticipationDto)
+                .map(ParticipationMapper::toParticipationDto)
                 .collect(Collectors.toList());
     }
 

@@ -67,9 +67,9 @@ public class EventServiceImpl implements EventService {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         List<ShortEventDto> events = eventRepository.searchEvents(text, categoryIds, paid, start, end, PUBLISHED,
-                PageRequest.of(from/size, size))
+                PageRequest.of(from / size, size))
                 .stream()
-                .map(EventMapper :: toShortEventDto)
+                .map(EventMapper::toShortEventDto)
                 .map(this::setViewsAndConfirmedRequests)
                 .collect(Collectors.toList());
         if (Boolean.TRUE.equals(onlyAvailable)) {
@@ -112,10 +112,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<ShortEventDto> getUserEvents(Long userId, int from, int size) {
         User user = checkAndGetUser(userId);
-        return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from/size, size))
+        return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size))
                 .stream()
-                .map(EventMapper :: toShortEventDto)
-                .map(this :: setViewsAndConfirmedRequests)
+                .map(EventMapper::toShortEventDto)
+                .map(this::setViewsAndConfirmedRequests)
                 .collect(Collectors.toList());
     }
 
@@ -128,21 +128,21 @@ public class EventServiceImpl implements EventService {
         if (event.getState().equals(PUBLISHED)) {
             throw new BadRequestException("published event cant be update");
         }
-        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event :: setAnnotation);
+        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
         if (eventDto.getCategory() != null) {
             event.setCategory(categoryRepository.findById(eventDto.getCategory())
                     .orElseThrow(() -> new NotFoundException("category not found")));
         }
-        Optional.ofNullable(eventDto.getDescription()).ifPresent(event :: setDescription);
+        Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
         if (eventDto.getEventDate() != null) {
             if (eventDto.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
                 throw new BadRequestException("date event is too late");
             }
             event.setEventDate(eventDto.getEventDate());
         }
-        Optional.ofNullable(eventDto.getPaid()).ifPresent(event :: setPaid);
-        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event :: setParticipantLimit);
-        Optional.ofNullable(eventDto.getTitle()).ifPresent(event :: setTitle);
+        Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
+        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
+        Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
         if (event.getState().equals(CANCELED)) {
             event.setState(PENDING);
         }
@@ -202,31 +202,31 @@ public class EventServiceImpl implements EventService {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         return eventRepository.searchEventsByAdmin(userIds, states, categoryIds, start, end,
-                PageRequest.of(from/size, size))
+                PageRequest.of(from / size, size))
                 .stream()
-                .map(EventMapper :: toEventDto)
-                .map(this :: setViewsAndConfirmedRequests)
+                .map(EventMapper::toEventDto)
+                .map(this::setViewsAndConfirmedRequests)
                 .collect(Collectors.toList());
     }
 
     @Override
     public EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto eventDto) {
         Event event = checkAndGetEvent(eventId);
-        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event :: setAnnotation);
+        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
         if (eventDto.getCategory() != null) {
             event.setCategory(categoryRepository.findById(eventDto.getCategory())
                     .orElseThrow(() -> new NotFoundException("category not found")));
         }
-        Optional.ofNullable(eventDto.getDescription()).ifPresent(event :: setDescription);
-        Optional.ofNullable(eventDto.getEventDate()).ifPresent(event :: setEventDate);
+        Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
+        Optional.ofNullable(eventDto.getEventDate()).ifPresent(event::setEventDate);
         if (eventDto.getLocation() != null) {
             Location location = locationRepository.save(toLocation(eventDto.getLocation()));
             event.setLocation(location);
         }
-        Optional.ofNullable(eventDto.getPaid()).ifPresent(event :: setPaid);
-        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event :: setParticipantLimit);
-        Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event :: setRequestModeration);
-        Optional.ofNullable(eventDto.getTitle()).ifPresent(event :: setTitle);
+        Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
+        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
+        Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
+        Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
         EventDto returnEventDto = toEventDto(eventRepository.save(event));
         return setViewsAndConfirmedRequests(returnEventDto);
     }
