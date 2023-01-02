@@ -4,6 +4,8 @@ import ru.practicum.ewm_main.event.dto.EventDto;
 import ru.practicum.ewm_main.event.dto.ShortEventDto;
 import ru.practicum.ewm_main.event.model.Event;
 
+import static ru.practicum.ewm_main.category.CategoryMapper.toCategory;
+import static ru.practicum.ewm_main.category.CategoryMapper.toCategoryDto;
 import static ru.practicum.ewm_main.event.LocationMapper.toLocationDto;
 import static ru.practicum.ewm_main.user.UserMapper.toShortUserDto;
 
@@ -13,7 +15,7 @@ public class EventMapper {
                 .builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(event.getCategory())
+                .category(toCategoryDto(event.getCategory()))
                 .createdOn(event.getCreatedOn())
                 .description(event.getDescription())
                 .eventDate(event.getEventDate())
@@ -33,7 +35,7 @@ public class EventMapper {
                 .builder()
                 .id(eventDto.getId())
                 .annotation(eventDto.getAnnotation())
-                .category(eventDto.getCategory())
+                .category(toCategory(eventDto.getCategory()))
                 .createdOn(eventDto.getCreatedOn())
                 .description(eventDto.getDescription())
                 .eventDate(eventDto.getEventDate())
@@ -51,7 +53,7 @@ public class EventMapper {
                 .builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(event.getCategory())
+                .category(toCategoryDto(event.getCategory()))
                 .eventDate(event.getEventDate())
                 .initiator(toShortUserDto(event.getInitiator()))
                 .paid(event.getPaid())
@@ -64,7 +66,7 @@ public class EventMapper {
                 .builder()
                 .id(shortEventDto.getId())
                 .annotation(shortEventDto.getAnnotation())
-                .category(shortEventDto.getCategory())
+                .category(toCategory(shortEventDto.getCategory()))
                 .eventDate(shortEventDto.getEventDate())
                 .paid(shortEventDto.getPaid())
                 .title(shortEventDto.getTitle())

@@ -1,26 +1,30 @@
 package ru.practicum.ewm_main.event.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserUpdateEventDto {
-    Long eventId;
+    private Long eventId;
 
-    String annotation;
+    private String annotation;
 
-    Long category;
+    private Long category;
 
-    String description;
+    private String description;
 
-    LocalDateTime eventDate;
+    private LocalDateTime eventDate;
 
-    Boolean paid;
+    private Boolean paid;
 
-    Integer participantLimit;
+    private Integer participantLimit;
 
-    String title;
+    private String title;
 }

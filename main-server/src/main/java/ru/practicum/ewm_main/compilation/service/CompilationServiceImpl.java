@@ -55,10 +55,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto createCompilation(ShortCompilationDto compilationDto) {
         Compilation compilation = toCompilation(compilationDto);
-        compilation.setEvents(compilationDto.getEventsIds()
-                .stream()
-                .map(this::getAndCheckEvent)
-                .collect(Collectors.toList()));
+        List<Event> events = eventRepository.findAllById(compilationDto.getEvents());
+        compilation.setEvents(events);
         return setViewsAndConfirmedRequests(toCompilationDto(compilationRepository.save(compilation)));
     }
 

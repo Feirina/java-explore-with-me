@@ -3,7 +3,10 @@ package ru.practicum.ewm_main.category.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm_main.category.dto.CategoryDto;
+import ru.practicum.ewm_main.category.dto.NewCategoryDto;
 import ru.practicum.ewm_main.category.service.CategoryService;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -16,13 +19,13 @@ public class AdminCategoryController {
     }
 
     @PatchMapping
-    public CategoryDto updateCategory(CategoryDto categoryDto) {
+    public CategoryDto updateCategory(@RequestBody CategoryDto categoryDto) {
         log.info("update category with id {}", categoryDto.getId());
         return categoryService.updateCategory(categoryDto);
     }
 
     @PostMapping
-    public CategoryDto createCategory(CategoryDto categoryDto) {
+    public CategoryDto createCategory(@Valid @RequestBody NewCategoryDto categoryDto) {
         log.info("create category");
         return categoryService.createCategory(categoryDto);
     }

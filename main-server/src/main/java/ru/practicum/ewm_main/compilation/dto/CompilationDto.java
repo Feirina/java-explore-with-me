@@ -1,8 +1,6 @@
 package ru.practicum.ewm_main.compilation.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.ewm_main.event.dto.ShortEventDto;
 
 import java.util.List;
@@ -10,6 +8,8 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CompilationDto {
     private Long id;
 

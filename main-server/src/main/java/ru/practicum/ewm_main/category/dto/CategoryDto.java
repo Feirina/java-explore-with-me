@@ -1,12 +1,12 @@
 package ru.practicum.ewm_main.category.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CategoryDto {
     private Long id;
 
