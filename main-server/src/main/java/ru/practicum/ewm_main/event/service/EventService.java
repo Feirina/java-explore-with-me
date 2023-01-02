@@ -1,7 +1,6 @@
 package ru.practicum.ewm_main.event.service;
 
 import ru.practicum.ewm_main.event.dto.*;
-import ru.practicum.ewm_main.event.model.State;
 
 import java.util.List;
 

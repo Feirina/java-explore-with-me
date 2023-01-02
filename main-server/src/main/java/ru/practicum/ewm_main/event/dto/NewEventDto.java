@@ -2,8 +2,6 @@ package ru.practicum.ewm_main.event.dto;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Builder

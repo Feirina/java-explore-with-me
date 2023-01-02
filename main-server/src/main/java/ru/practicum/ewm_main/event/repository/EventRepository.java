@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm_main.event.model.Event;
 import ru.practicum.ewm_main.event.model.State;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
