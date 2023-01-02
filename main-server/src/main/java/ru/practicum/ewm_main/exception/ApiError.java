@@ -1,27 +1,27 @@
 package ru.practicum.ewm_main.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 public class ApiError {
-    @NotBlank
-    private List<Error> errors;
+    private List<String> errors;
 
-    @NotEmpty
     private String message;
 
     private String reason;
 
-    private String status;
+    private HttpStatus status;
 
-    private LocalDateTime timestamp;
+    @Builder.Default
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime timestamp = LocalDateTime.now();
 }

@@ -190,7 +190,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventDto> getEventsByAdmin(List<Long> userIds, List<String> states, List<Long> categoryIds,
                                            String rangeStart, String rangeEnd, int from, int size) {
-        List<State> stateList = states
+        List<State> stateList = states == null ? null : states
                 .stream()
                 .map(State::valueOf)
                 .collect(Collectors.toList());

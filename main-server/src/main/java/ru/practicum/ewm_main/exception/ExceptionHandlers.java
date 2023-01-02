@@ -1,54 +1,57 @@
 package ru.practicum.ewm_main.exception;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @RestControllerAdvice
 public class ExceptionHandlers {
-    @ExceptionHandler(NotFoundException.class)
-    public ApiError handleNotFoundExceptions(RuntimeException e) {
-        return ApiError.builder()
-                .status(String.valueOf(HttpStatus.NOT_FOUND))
-                .reason("object not found")
-                .message(e.getLocalizedMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ApiError handleBadRequestExceptions(RuntimeException e) {
-        return ApiError.builder()
-                .status(String.valueOf(HttpStatus.FORBIDDEN))
-                .reason("bad request")
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConflictException(final ConflictException e) {
+        return new ApiError.ApiErrorBuilder()
+                .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())
-                .timestamp(LocalDateTime.now())
+                .reason("The required object was found.")
+                .status(HttpStatus.CONFLICT)
                 .build();
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleConstraintExceptions(DataIntegrityViolationException e) {
-        return ApiError.builder()
-                .status(String.valueOf(HttpStatus.CONFLICT))
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleUserNotFoundException(final NotFoundException e, WebRequest request) {
+        return new ApiError.ApiErrorBuilder()
+                .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())
-                .timestamp(LocalDateTime.now())
-                .reason("constraint exception")
+                .reason("Пользователь не найден " + request.getDescription(false))
+                .status(HttpStatus.NOT_FOUND)
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleValidationException(final BadRequestException e, WebRequest request) {
+        return new ApiError.ApiErrorBuilder()
+                .errors(List.of(e.getClass().getName()))
+                .message(e.getLocalizedMessage())
+                .reason(request.getDescription(false))
+                .status(HttpStatus.FORBIDDEN)
                 .build();
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleThrowableExceptions(final Throwable e) {
-        return ApiError.builder()
+        return new ApiError.ApiErrorBuilder()
+                .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())
                 .reason("Throwable exception")
-                .status(String.valueOf(HttpStatus.BAD_REQUEST))
-                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST)
                 .build();
     }
 }

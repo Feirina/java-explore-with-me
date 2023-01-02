@@ -1,6 +1,7 @@
 package ru.practicum.ewm_main.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm_main.user.dto.UserDto;
 import ru.practicum.ewm_main.user.service.UserService;
@@ -11,6 +12,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/admin/users")
+@Validated
 public class UserController {
     private final UserService userService;
 

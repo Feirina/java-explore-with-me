@@ -8,6 +8,7 @@ import ru.practicum.ewm_main.category.dto.CategoryDto;
 import ru.practicum.ewm_main.category.dto.NewCategoryDto;
 import ru.practicum.ewm_main.category.model.Category;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
+import ru.practicum.ewm_main.exception.ConflictException;
 import ru.practicum.ewm_main.exception.NotFoundException;
 
 import java.util.List;
@@ -42,13 +43,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = getAndCheckCategory(categoryDto.getId());
+        if (categoryRepository.findByName(categoryDto.getName()).isPresent()) {
+            throw new ConflictException("category already exist");
+        }
         category.setName(categoryDto.getName());
         return toCategoryDto(categoryRepository.save(category));
+
     }
 
     @Transactional
     @Override
     public CategoryDto createCategory(NewCategoryDto categoryDto) {
+        if (categoryRepository.findByName(categoryDto.getName()).isPresent()) {
+            throw new ConflictException("category already exist");
+        }
         return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
     }
 

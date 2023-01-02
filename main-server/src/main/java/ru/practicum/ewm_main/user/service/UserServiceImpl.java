@@ -3,6 +3,7 @@ package ru.practicum.ewm_main.user.service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm_main.exception.ConflictException;
 import ru.practicum.ewm_main.exception.NotFoundException;
 import ru.practicum.ewm_main.user.UserMapper;
 import ru.practicum.ewm_main.user.dto.UserDto;
@@ -41,6 +42,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userRepository.findByName(userDto.getName()).isPresent()) {
+            throw new ConflictException("category already exist");
+        }
         return toUserDto(userRepository.save(toUser(userDto)));
     }
 
