@@ -20,16 +20,16 @@ public class AdminEventController {
     }
 
     @GetMapping
-    public List<EventDto> getEventsByAdmin(@RequestParam List<Long> userIds,
-                                           @RequestParam List<State> states,
-                                           @RequestParam List<Long> categoryIds,
-                                           @RequestParam String rangeStart,
-                                           @RequestParam String rangeEnd,
+    public List<EventDto> getEventsByAdmin(@RequestParam(required = false) List<Long> users,
+                                           @RequestParam(required = false) List<String> states,
+                                           @RequestParam(required = false) List<Long> categories,
+                                           @RequestParam(required = false) String rangeStart,
+                                           @RequestParam(required = false) String rangeEnd,
                                            @RequestParam (defaultValue = "0") int from,
                                            @RequestParam (defaultValue = "10") int size) {
         log.info("get events by admin with param: userIds = {}, states = {}, categoryIds = {}, rangeStart = {}, " +
-                "rangeEnd = {}, from = {}, size = {}", userIds, states, categoryIds, rangeStart, rangeEnd, from, size);
-        return eventService.getEventsByAdmin(userIds, states, categoryIds, rangeStart, rangeEnd, from, size);
+                "rangeEnd = {}, from = {}, size = {}", users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PutMapping("/{eventId}")

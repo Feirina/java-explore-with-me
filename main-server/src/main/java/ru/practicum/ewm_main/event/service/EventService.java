@@ -1,9 +1,6 @@
 package ru.practicum.ewm_main.event.service;
 
-import ru.practicum.ewm_main.event.dto.AdminUpdateEventDto;
-import ru.practicum.ewm_main.event.dto.EventDto;
-import ru.practicum.ewm_main.event.dto.ShortEventDto;
-import ru.practicum.ewm_main.event.dto.UserUpdateEventDto;
+import ru.practicum.ewm_main.event.dto.*;
 import ru.practicum.ewm_main.event.model.State;
 
 import java.util.List;
@@ -18,13 +15,13 @@ public interface EventService {
 
     EventDto updateEvent(Long userId, UserUpdateEventDto eventDto);
 
-    EventDto createEvent(Long userId, EventDto eventDto);
+    EventDto createEvent(Long userId, NewEventDto eventDto);
 
     EventDto getEventByUser(Long eventId, Long userId);
 
     EventDto cancelEventByUser(Long eventId, Long userId);
 
-    List<EventDto> getEventsByAdmin(List<Long> userIds, List<State> states, List<Long> categoryIds,
+    List<EventDto> getEventsByAdmin(List<Long> userIds, List<String> states, List<Long> categoryIds,
                                     String rangeStart, String rangeEnd, int from, int size);
 
     EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto eventDto);

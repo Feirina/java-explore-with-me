@@ -19,7 +19,7 @@ public class AdminCategoryController {
     }
 
     @PatchMapping
-    public CategoryDto updateCategory(@RequestBody CategoryDto categoryDto) {
+    public CategoryDto updateCategory(@Valid @RequestBody CategoryDto categoryDto) {
         log.info("update category with id {}", categoryDto.getId());
         return categoryService.updateCategory(categoryDto);
     }

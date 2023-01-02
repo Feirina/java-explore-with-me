@@ -19,11 +19,11 @@ public class EventDto {
 
     private CategoryDto category;
 
-    private LocalDateTime createdOn;
+    private String createdOn;
 
     private String description;
 
-    private LocalDateTime eventDate;
+    private String eventDate;
 
     private ShortUserDto initiator;
 

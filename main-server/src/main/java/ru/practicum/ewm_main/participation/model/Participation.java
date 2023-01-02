@@ -23,9 +23,11 @@ public class Participation {
     private LocalDateTime created;
 
     @ManyToOne
+    @JoinColumn(name = "event_id")
     private Event event;
 
     @ManyToOne
+    @JoinColumn(name = "requester")
     private User requester;
 
     @Enumerated(EnumType.STRING)

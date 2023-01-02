@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class ParticipationDto {
     private Long id;
 
-    private LocalDateTime created;
+    private String created;
 
     private Long event;
 

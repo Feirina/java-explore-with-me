@@ -48,7 +48,8 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Transactional
     @Override
     public ParticipationDto createParticipationRequest(Long userId, Long eventId) {
-        if (participationRepository.findByEventIdAndRequesterId(eventId, userId) != null) {
+        User user = userRepository.findById(userId).orElseThrow();
+        if (participationRepository.findByEventIdAndRequester(eventId, user) != null) {
             throw new BadRequestException("participation request already exist");
         }
         Participation participation = Participation
@@ -113,7 +114,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         if (!participation.getStatus().equals(PENDING)) {
             throw new BadRequestException("only participation request with status pending can be approval");
         }
-        if (event.getParticipantLimit() >= participationRepository.countParticipationByEventIdAndStatus(eventId, CONFIRMED)) {
+        if (event.getParticipantLimit() <= participationRepository.countParticipationByEventIdAndStatus(eventId, CONFIRMED)) {
             participation.setStatus(REJECTED);
         } else {
             participation.setStatus(CONFIRMED);

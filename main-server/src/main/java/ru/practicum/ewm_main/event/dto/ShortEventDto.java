@@ -19,7 +19,7 @@ public class ShortEventDto {
 
     private CategoryDto category;
 
-    private LocalDateTime eventDate;
+    private String eventDate;
 
     private ShortUserDto initiator;
 

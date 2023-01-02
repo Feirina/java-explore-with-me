@@ -18,7 +18,7 @@ public class AdminUpdateEventDto {
 
     private String description;
 
-    private LocalDateTime eventDate;
+    private String eventDate;
 
     private LocationDto location;
 

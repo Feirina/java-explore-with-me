@@ -6,10 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
 import ru.practicum.ewm_main.client.EventClient;
 import ru.practicum.ewm_main.event.EventMapper;
-import ru.practicum.ewm_main.event.dto.AdminUpdateEventDto;
-import ru.practicum.ewm_main.event.dto.EventDto;
-import ru.practicum.ewm_main.event.dto.ShortEventDto;
-import ru.practicum.ewm_main.event.dto.UserUpdateEventDto;
+import ru.practicum.ewm_main.event.dto.*;
 import ru.practicum.ewm_main.event.model.Event;
 import ru.practicum.ewm_main.event.model.Location;
 import ru.practicum.ewm_main.event.model.State;
@@ -43,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public EventServiceImpl(EventRepository eventRepository, EventClient eventClient, ParticipationRepository participationRepository, CategoryRepository categoryRepository, LocationRepository locationRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
@@ -56,21 +54,15 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<ShortEventDto> getEvents(String text, List<Long> categoryIds, Boolean paid, String rangeStart,
                                          String rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
-        LocalDateTime start;
-        if (rangeStart == null) {
-            start = LocalDateTime.now();
-        } else {
-            start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        LocalDateTime end;
-        if (rangeEnd == null) {
-            end = LocalDateTime.MAX;
-        } else {
-            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        List<ShortEventDto> events = eventRepository.searchEvents(text, categoryIds, paid, start, end, PUBLISHED,
+        List<ShortEventDto> events = eventRepository.searchEvents(text, categoryIds, paid, PUBLISHED,
                 PageRequest.of(from / size, size))
                 .stream()
+                .filter(event -> rangeStart != null ?
+                        event.getEventDate().isAfter(LocalDateTime.parse(rangeStart, DATE_TIME_FORMATTER)) :
+                        event.getEventDate().isAfter(LocalDateTime.now())
+                                && rangeEnd != null ? event.getEventDate().isBefore(LocalDateTime.parse(rangeEnd,
+                                DATE_TIME_FORMATTER)) :
+                                event.getEventDate().isBefore(LocalDateTime.MAX))
                 .map(EventMapper::toShortEventDto)
                 .map(this::setViewsAndConfirmedRequests)
                 .collect(Collectors.toList());
@@ -137,11 +129,13 @@ public class EventServiceImpl implements EventService {
                     .orElseThrow(() -> new NotFoundException("category not found")));
         }
         Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
+        LocalDateTime date = LocalDateTime.parse(eventDto.getEventDate(),
+                DATE_TIME_FORMATTER);
         if (eventDto.getEventDate() != null) {
-            if (eventDto.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
+            if (date.isBefore(LocalDateTime.now().minusHours(2))) {
                 throw new BadRequestException("date event is too late");
             }
-            event.setEventDate(eventDto.getEventDate());
+            event.setEventDate(date);
         }
         Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
         Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
@@ -155,13 +149,15 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public EventDto createEvent(Long userId, EventDto eventDto) {
+    public EventDto createEvent(Long userId, NewEventDto eventDto) {
         User user = checkAndGetUser(userId);
-        if (eventDto.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
+        Event event = toEvent(eventDto);
+        if (event.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
             throw new BadRequestException("date event is too late");
         }
         Location location = locationRepository.save(toLocation(eventDto.getLocation()));
-        Event event = toEvent(eventDto);
+        event.setCategory(categoryRepository.findById(eventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("category not found")));
         event.setLocation(location);
         event.setInitiator(user);
         return toEventDto(eventRepository.save(event));
@@ -192,23 +188,19 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDto> getEventsByAdmin(List<Long> userIds, List<State> states, List<Long> categoryIds,
+    public List<EventDto> getEventsByAdmin(List<Long> userIds, List<String> states, List<Long> categoryIds,
                                            String rangeStart, String rangeEnd, int from, int size) {
-        LocalDateTime start;
-        if (rangeStart == null) {
-            start = LocalDateTime.now();
-        } else {
-            start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        LocalDateTime end;
-        if (rangeEnd == null) {
-            end = LocalDateTime.MAX;
-        } else {
-            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        return eventRepository.searchEventsByAdmin(userIds, states, categoryIds, start, end,
-                PageRequest.of(from / size, size))
+        List<State> stateList = states
                 .stream()
+                .map(State::valueOf)
+                .collect(Collectors.toList());
+        return eventRepository.searchEventsByAdmin(userIds, stateList, categoryIds, PageRequest.of(from / size, size))
+                .stream()
+                .filter(event -> rangeStart != null ?
+                        event.getEventDate().isAfter(LocalDateTime.parse(rangeStart, DATE_TIME_FORMATTER)) :
+                        event.getEventDate().isAfter(LocalDateTime.now())
+                        && rangeEnd != null ? event.getEventDate().isBefore(LocalDateTime.parse(rangeEnd,
+                                DATE_TIME_FORMATTER)) : event.getEventDate().isBefore(LocalDateTime.MAX))
                 .map(EventMapper::toEventDto)
                 .map(this::setViewsAndConfirmedRequests)
                 .collect(Collectors.toList());
@@ -224,7 +216,9 @@ public class EventServiceImpl implements EventService {
                     .orElseThrow(() -> new NotFoundException("category not found")));
         }
         Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
-        Optional.ofNullable(eventDto.getEventDate()).ifPresent(event::setEventDate);
+        if (eventDto.getEventDate() != null) {
+            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(), DATE_TIME_FORMATTER));
+        }
         if (eventDto.getLocation() != null) {
             Location location = locationRepository.save(toLocation(eventDto.getLocation()));
             event.setLocation(location);

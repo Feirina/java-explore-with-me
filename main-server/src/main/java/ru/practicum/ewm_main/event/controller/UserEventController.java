@@ -3,6 +3,7 @@ package ru.practicum.ewm_main.event.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm_main.event.dto.EventDto;
+import ru.practicum.ewm_main.event.dto.NewEventDto;
 import ru.practicum.ewm_main.event.dto.ShortEventDto;
 import ru.practicum.ewm_main.event.dto.UserUpdateEventDto;
 import ru.practicum.ewm_main.event.service.EventService;
@@ -40,7 +41,7 @@ public class UserEventController {
 
     @PostMapping
     public EventDto createEvent(@PathVariable Long userId,
-                                @RequestBody EventDto eventDto) {
+                                @RequestBody NewEventDto eventDto) {
         log.info("create event by user with id {}", userId);
         return eventService.createEvent(userId, eventDto);
     }
