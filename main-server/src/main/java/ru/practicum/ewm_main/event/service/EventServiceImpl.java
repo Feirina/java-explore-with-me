@@ -2,6 +2,7 @@ package ru.practicum.ewm_main.event.service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
 import ru.practicum.ewm_main.client.EventClient;
 import ru.practicum.ewm_main.event.EventMapper;
@@ -34,6 +35,7 @@ import static ru.practicum.ewm_main.event.model.State.*;
 import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 
 @Service
+@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventClient eventClient;
@@ -119,6 +121,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public EventDto updateEvent(Long userId, UserUpdateEventDto eventDto) {
         Event event = checkAndGetEvent(eventDto.getEventId());
@@ -150,6 +153,7 @@ public class EventServiceImpl implements EventService {
         return setViewsAndConfirmedRequests(returnEventDto);
     }
 
+    @Transactional
     @Override
     public EventDto createEvent(Long userId, EventDto eventDto) {
         User user = checkAndGetUser(userId);
@@ -172,6 +176,7 @@ public class EventServiceImpl implements EventService {
         return setViewsAndConfirmedRequests(toEventDto(event));
     }
 
+    @Transactional
     @Override
     public EventDto cancelEventByUser(Long eventId, Long userId) {
         Event event = checkAndGetEvent(eventId);
@@ -209,6 +214,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto eventDto) {
         Event event = checkAndGetEvent(eventId);
@@ -231,6 +237,7 @@ public class EventServiceImpl implements EventService {
         return setViewsAndConfirmedRequests(returnEventDto);
     }
 
+    @Transactional
     @Override
     public EventDto publishEvent(Long eventId) {
         Event event = checkAndGetEvent(eventId);
@@ -245,6 +252,7 @@ public class EventServiceImpl implements EventService {
         return setViewsAndConfirmedRequests(eventDto);
     }
 
+    @Transactional
     @Override
     public EventDto rejectEvent(Long eventId) {
         Event event = checkAndGetEvent(eventId);

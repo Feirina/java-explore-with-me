@@ -2,6 +2,7 @@ package ru.practicum.ewm_main.user.service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.exception.NotFoundException;
 import ru.practicum.ewm_main.user.UserMapper;
 import ru.practicum.ewm_main.user.dto.UserDto;
@@ -15,6 +16,7 @@ import static ru.practicum.ewm_main.user.UserMapper.toUser;
 import static ru.practicum.ewm_main.user.UserMapper.toUserDto;
 
 @Service
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
@@ -36,11 +38,13 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
         return toUserDto(userRepository.save(toUser(userDto)));
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long id) {
         userRepository.delete(checkAndGetUser(id));

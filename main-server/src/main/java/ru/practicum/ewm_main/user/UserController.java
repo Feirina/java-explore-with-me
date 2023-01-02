@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm_main.user.dto.UserDto;
 import ru.practicum.ewm_main.user.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) {
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
         log.info("create user");
         return userService.createUser(userDto);
     }

@@ -1,6 +1,7 @@
 package ru.practicum.ewm_main.participation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.event.model.Event;
 import ru.practicum.ewm_main.event.repository.EventRepository;
 import ru.practicum.ewm_main.exception.BadRequestException;
@@ -22,6 +23,7 @@ import static ru.practicum.ewm_main.participation.ParticipationMapper.toParticip
 import static ru.practicum.ewm_main.participation.model.StatusRequest.*;
 
 @Service
+@Transactional(readOnly = true)
 public class ParticipationServiceImpl implements ParticipationService {
     private final ParticipationRepository participationRepository;
     private final UserRepository userRepository;
@@ -43,6 +45,7 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ParticipationDto createParticipationRequest(Long userId, Long eventId) {
         if (participationRepository.findByEventIdAndRequesterId(eventId, userId) != null) {
@@ -73,6 +76,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         return toParticipationDto(participationRepository.save(participation));
     }
 
+    @Transactional
     @Override
     public ParticipationDto cancelParticipationRequest(Long userId, Long reqId) {
         Participation participation = participationRepository.findById(reqId)
@@ -97,6 +101,7 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ParticipationDto confirmParticipationRequest(Long eventId, Long userId, Long reqId) {
         Event event = checkAndGetEvent(eventId);
@@ -116,6 +121,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         return toParticipationDto(participationRepository.save(participation));
     }
 
+    @Transactional
     @Override
     public ParticipationDto rejectParticipationRequest(Long eventId, Long userId, Long reqId) {
         Event event = checkAndGetEvent(eventId);

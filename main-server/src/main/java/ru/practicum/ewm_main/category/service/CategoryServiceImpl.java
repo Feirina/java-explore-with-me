@@ -2,6 +2,7 @@ package ru.practicum.ewm_main.category.service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.category.CategoryMapper;
 import ru.practicum.ewm_main.category.dto.CategoryDto;
 import ru.practicum.ewm_main.category.model.Category;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.ewm_main.category.CategoryMapper.toCategory;
 import static ru.practicum.ewm_main.category.CategoryMapper.toCategoryDto;
 
+@Transactional(readOnly = true)
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
@@ -35,6 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
         return toCategoryDto(getAndCheckCategory(id));
     }
 
+    @Transactional
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = getAndCheckCategory(categoryDto.getId());
@@ -42,11 +45,13 @@ public class CategoryServiceImpl implements CategoryService {
         return toCategoryDto(categoryRepository.save(category));
     }
 
+    @Transactional
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
     }
 
+    @Transactional
     @Override
     public void deleteCategory(Long id) {
         categoryRepository.delete(getAndCheckCategory(id));

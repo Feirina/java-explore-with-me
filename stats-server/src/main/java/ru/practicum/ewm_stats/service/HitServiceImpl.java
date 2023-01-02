@@ -1,6 +1,7 @@
 package ru.practicum.ewm_stats.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_stats.HitMapper;
 import ru.practicum.ewm_stats.dto.EndpointHit;
 import ru.practicum.ewm_stats.dto.ViewStats;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.ewm_stats.HitMapper.toHit;
 
 @Service
+@Transactional(readOnly = true)
 public class HitServiceImpl implements HitService {
     private final HitRepository hitRepository;
 
@@ -22,6 +24,7 @@ public class HitServiceImpl implements HitService {
         this.hitRepository = hitRepository;
     }
 
+    @Transactional
     @Override
     public void saveHit(EndpointHit endpointHit) {
         hitRepository.save(toHit(endpointHit));
