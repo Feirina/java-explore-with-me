@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EventClient extends BaseClient {
@@ -28,6 +30,7 @@ public class EventClient extends BaseClient {
                 .ip(ip)
                 .uri(uri)
                 .app("main-server")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .build());
     }
 }
