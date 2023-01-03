@@ -44,7 +44,7 @@ public class ExceptionHandlers {
                 .build();
     }
 
-    @ExceptionHandler
+    /*@ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleThrowableExceptions(final Throwable e) {
         return new ApiError.ApiErrorBuilder()
@@ -53,5 +53,5 @@ public class ExceptionHandlers {
                 .reason("Throwable exception")
                 .status(HttpStatus.BAD_REQUEST)
                 .build();
-    }
+    }*/
 }
