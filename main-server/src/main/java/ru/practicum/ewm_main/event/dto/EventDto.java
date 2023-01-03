@@ -43,5 +43,5 @@ public class EventDto {
 
     private Integer confirmedRequests;
 
-    private Integer views;
+    private Long views;
 }

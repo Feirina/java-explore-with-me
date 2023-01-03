@@ -4,7 +4,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
-import ru.practicum.ewm_main.client.EventClient;
 import ru.practicum.ewm_main.event.EventMapper;
 import ru.practicum.ewm_main.event.dto.*;
 import ru.practicum.ewm_main.event.model.Event;
@@ -35,16 +34,14 @@ import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
-    private final EventClient eventClient;
     private final ParticipationRepository participationRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public EventServiceImpl(EventRepository eventRepository, EventClient eventClient, ParticipationRepository participationRepository, CategoryRepository categoryRepository, LocationRepository locationRepository, UserRepository userRepository) {
+    public EventServiceImpl(EventRepository eventRepository, ParticipationRepository participationRepository, CategoryRepository categoryRepository, LocationRepository locationRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
-        this.eventClient = eventClient;
         this.participationRepository = participationRepository;
         this.categoryRepository = categoryRepository;
         this.locationRepository = locationRepository;
@@ -64,7 +61,7 @@ public class EventServiceImpl implements EventService {
                                 DATE_TIME_FORMATTER)) :
                                 event.getEventDate().isBefore(LocalDateTime.MAX))
                 .map(EventMapper::toShortEventDto)
-                .map(this::setViewsAndConfirmedRequests)
+                .map(this::setConfirmedRequests)
                 .collect(Collectors.toList());
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events = events.stream().filter(shortEventDto ->
@@ -91,7 +88,10 @@ public class EventServiceImpl implements EventService {
                     throw new BadRequestException("can be sorted only by views or event date");
             }
         }
-        return events;
+        return events
+                .stream()
+                .peek(shortEventDto -> incrementViews(shortEventDto.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -100,7 +100,8 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(PUBLISHED)) {
             throw new BadRequestException("event must be published");
         }
-        return setViewsAndConfirmedRequests(toEventDto(event));
+        incrementViews(id);
+        return setConfirmedRequests(toEventDto(event));
     }
 
     @Override
@@ -109,7 +110,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size))
                 .stream()
                 .map(EventMapper::toShortEventDto)
-                .map(this::setViewsAndConfirmedRequests)
+                .map(this::setConfirmedRequests)
                 .collect(Collectors.toList());
     }
 
@@ -144,7 +145,7 @@ public class EventServiceImpl implements EventService {
             event.setState(PENDING);
         }
         EventDto returnEventDto = toEventDto(eventRepository.save(event));
-        return setViewsAndConfirmedRequests(returnEventDto);
+        return setConfirmedRequests(returnEventDto);
     }
 
     @Transactional
@@ -169,7 +170,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getInitiator().getId().equals(userId)) {
             throw new BadRequestException("only initiator can get fullEventDto");
         }
-        return setViewsAndConfirmedRequests(toEventDto(event));
+        return setConfirmedRequests(toEventDto(event));
     }
 
     @Transactional
@@ -184,7 +185,7 @@ public class EventServiceImpl implements EventService {
         }
         event.setState(CANCELED);
         EventDto eventDto = toEventDto(eventRepository.save(event));
-        return setViewsAndConfirmedRequests(eventDto);
+        return setConfirmedRequests(eventDto);
     }
 
     @Override
@@ -202,7 +203,7 @@ public class EventServiceImpl implements EventService {
                         && rangeEnd != null ? event.getEventDate().isBefore(LocalDateTime.parse(rangeEnd,
                                 DATE_TIME_FORMATTER)) : event.getEventDate().isBefore(LocalDateTime.MAX))
                 .map(EventMapper::toEventDto)
-                .map(this::setViewsAndConfirmedRequests)
+                .map(this::setConfirmedRequests)
                 .collect(Collectors.toList());
     }
 
@@ -228,7 +229,7 @@ public class EventServiceImpl implements EventService {
         Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
         Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
         EventDto returnEventDto = toEventDto(eventRepository.save(event));
-        return setViewsAndConfirmedRequests(returnEventDto);
+        return setConfirmedRequests(returnEventDto);
     }
 
     @Transactional
@@ -243,7 +244,7 @@ public class EventServiceImpl implements EventService {
         }
         event.setState(PUBLISHED);
         EventDto eventDto = toEventDto(eventRepository.save(event));
-        return setViewsAndConfirmedRequests(eventDto);
+        return setConfirmedRequests(eventDto);
     }
 
     @Transactional
@@ -252,25 +253,25 @@ public class EventServiceImpl implements EventService {
         Event event = checkAndGetEvent(eventId);
         event.setState(CANCELED);
         EventDto eventDto = toEventDto(eventRepository.save(event));
-        return setViewsAndConfirmedRequests(eventDto);
+        return setConfirmedRequests(eventDto);
     }
 
-    private Integer getViews(Long eventId) {
-        return (Integer) eventClient.getViews("/events/" + eventId);
-    }
-
-    private EventDto setViewsAndConfirmedRequests(EventDto eventDto) {
-        eventDto.setViews(getViews(eventDto.getId()));
+    private EventDto setConfirmedRequests(EventDto eventDto) {
         eventDto.setConfirmedRequests(participationRepository.countParticipationByEventIdAndStatus(eventDto.getId(),
                 CONFIRMED));
         return eventDto;
     }
 
-    private ShortEventDto setViewsAndConfirmedRequests(ShortEventDto eventDto) {
-        eventDto.setViews(getViews(eventDto.getId()));
+    private ShortEventDto setConfirmedRequests(ShortEventDto eventDto) {
         eventDto.setConfirmedRequests(participationRepository.countParticipationByEventIdAndStatus(eventDto.getId(),
                 CONFIRMED));
         return eventDto;
+    }
+
+    private void incrementViews(Long id) {
+        Event event = checkAndGetEvent(id);
+        long views = event.getViews() + 1;
+        event.setViews(views);
     }
 
     private Event checkAndGetEvent(Long id) {

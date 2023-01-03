@@ -15,5 +15,5 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
 
     List<Hit> findAllByTimestampBetween(LocalDateTime start, LocalDateTime end);
 
-    Long countByUri(String uri);
+    Integer countByUri(String uri);
 }

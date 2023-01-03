@@ -3,7 +3,6 @@ package ru.practicum.ewm_main.compilation.service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm_main.client.EventClient;
 import ru.practicum.ewm_main.compilation.CompilationMapper;
 import ru.practicum.ewm_main.compilation.dto.CompilationDto;
 import ru.practicum.ewm_main.compilation.dto.ShortCompilationDto;
@@ -27,13 +26,11 @@ import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
-    private final EventClient eventClient;
     private final ParticipationRepository participationRepository;
 
-    public CompilationServiceImpl(CompilationRepository compilationRepository, EventRepository eventRepository, EventClient eventClient, ParticipationRepository participationRepository) {
+    public CompilationServiceImpl(CompilationRepository compilationRepository, EventRepository eventRepository, ParticipationRepository participationRepository) {
         this.compilationRepository = compilationRepository;
         this.eventRepository = eventRepository;
-        this.eventClient = eventClient;
         this.participationRepository = participationRepository;
     }
 
@@ -98,12 +95,7 @@ public class CompilationServiceImpl implements CompilationService {
         compilationRepository.save(compilation);
     }
 
-    private Integer getViews(Long eventId) {
-        return (Integer) eventClient.getViews("/events/" + eventId);
-    }
-
-    private ShortEventDto setViewsAndConfirmedRequests(ShortEventDto eventDto) {
-        eventDto.setViews(getViews(eventDto.getId()));
+    private ShortEventDto setConfirmedRequests(ShortEventDto eventDto) {
         eventDto.setConfirmedRequests(participationRepository.countParticipationByEventIdAndStatus(eventDto.getId(),
                 CONFIRMED));
         return eventDto;
@@ -112,7 +104,7 @@ public class CompilationServiceImpl implements CompilationService {
     private CompilationDto setViewsAndConfirmedRequests(CompilationDto compilationDto) {
         compilationDto.setEvents(compilationDto.getEvents()
                 .stream()
-                .map(this::setViewsAndConfirmedRequests)
+                .map(this::setConfirmedRequests)
                 .collect(Collectors.toList()));
         return compilationDto;
     }

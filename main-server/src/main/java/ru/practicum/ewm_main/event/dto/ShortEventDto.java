@@ -26,5 +26,5 @@ public class ShortEventDto {
 
     private Integer confirmedRequests;
 
-    private Integer views;
+    private Long views;
 }

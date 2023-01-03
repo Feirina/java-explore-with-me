@@ -38,13 +38,13 @@ public class HitServiceImpl implements HitService {
         if (Boolean.TRUE.equals(uniq)) {
             hits = hitRepository.findDistinct(startDate, endDate)
                     .stream()
-                    .peek(viewStats -> viewStats.setHits(countViewsByUri(viewStats.getUri())))
+                    .peek(viewStats -> viewStats.setHits(Long.valueOf(countViewsByUri(viewStats.getUri()))))
                     .collect(Collectors.toList());
         } else {
             hits = hitRepository.findAllByTimestampBetween(startDate, endDate)
                     .stream()
                     .map(HitMapper::toViewStats)
-                    .peek(viewStats -> viewStats.setHits(countViewsByUri(viewStats.getUri())))
+                    .peek(viewStats -> viewStats.setHits(Long.valueOf(countViewsByUri(viewStats.getUri()))))
                     .collect(Collectors.toList());
         }
         return uris == null ? hits : hits.stream()
@@ -53,8 +53,7 @@ public class HitServiceImpl implements HitService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public Long countViewsByUri(String uri) {
+    private Integer countViewsByUri(String uri) {
         return hitRepository.countByUri(uri);
     }
 

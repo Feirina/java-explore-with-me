@@ -57,4 +57,7 @@ public class Event {
 
     @Column(length = 255, nullable = false)
     private String title;
+
+    @Builder.Default
+    private Long views = 0L;
 }

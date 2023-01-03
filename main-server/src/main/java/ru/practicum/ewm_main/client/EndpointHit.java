@@ -4,17 +4,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Getter
 @Setter
 @Builder
 public class EndpointHit {
-    private Long id;
-
     private String app;
 
     private String uri;
 
     private String ip;
 
-    private String timestamp;
+    @Builder.Default
+    private String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 }

@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS events (
     published_on TIMESTAMP,
     request_moderation BOOLEAN,
     state VARCHAR(50),
-    title VARCHAR(255) NOT NULL
+    title VARCHAR(255) NOT NULL,
+    views BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS participations (
