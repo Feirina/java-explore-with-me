@@ -17,8 +17,6 @@ import ru.practicum.ewm_main.participation.repository.ParticipationRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm_main.compilation.CompilationMapper.toCompilation;
-import static ru.practicum.ewm_main.compilation.CompilationMapper.toCompilationDto;
 import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 
 @Transactional(readOnly = true)
@@ -36,6 +34,12 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
+        if (pinned == null) {
+            return compilationRepository.findAll(PageRequest.of(from / size, size))
+                    .stream()
+                    .map(CompilationMapper::toCompilationDto)
+                    .collect(Collectors.toList());
+        }
         return compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size))
                 .stream()
                 .map(CompilationMapper::toCompilationDto)
@@ -45,16 +49,16 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto getCompilation(Long id) {
-        return setViewsAndConfirmedRequests(toCompilationDto(getAndCheckCompilation(id)));
+        return setViewsAndConfirmedRequests(CompilationMapper.toCompilationDto(getAndCheckCompilation(id)));
     }
 
     @Transactional
     @Override
     public CompilationDto createCompilation(ShortCompilationDto compilationDto) {
-        Compilation compilation = toCompilation(compilationDto);
+        Compilation compilation = CompilationMapper.toCompilation(compilationDto);
         List<Event> events = eventRepository.findAllById(compilationDto.getEvents());
         compilation.setEvents(events);
-        return setViewsAndConfirmedRequests(toCompilationDto(compilationRepository.save(compilation)));
+        return setViewsAndConfirmedRequests(CompilationMapper.toCompilationDto(compilationRepository.save(compilation)));
     }
 
     @Transactional

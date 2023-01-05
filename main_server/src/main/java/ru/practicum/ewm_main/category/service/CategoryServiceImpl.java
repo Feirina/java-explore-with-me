@@ -8,22 +8,22 @@ import ru.practicum.ewm_main.category.dto.CategoryDto;
 import ru.practicum.ewm_main.category.dto.NewCategoryDto;
 import ru.practicum.ewm_main.category.model.Category;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
-import ru.practicum.ewm_main.exception.ConflictException;
+import ru.practicum.ewm_main.event.repository.EventRepository;
+import ru.practicum.ewm_main.exception.BadRequestException;
 import ru.practicum.ewm_main.exception.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm_main.category.CategoryMapper.toCategory;
-import static ru.practicum.ewm_main.category.CategoryMapper.toCategoryDto;
-
 @Transactional(readOnly = true)
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -36,33 +36,29 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getCategory(Long id) {
-        return toCategoryDto(getAndCheckCategory(id));
+        return CategoryMapper.toCategoryDto(getAndCheckCategory(id));
     }
 
     @Transactional
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = getAndCheckCategory(categoryDto.getId());
-        if (categoryRepository.findByName(categoryDto.getName()).isPresent()) {
-            throw new ConflictException("category already exist");
-        }
         category.setName(categoryDto.getName());
-        return toCategoryDto(categoryRepository.save(category));
-
+        return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
     @Transactional
     @Override
     public CategoryDto createCategory(NewCategoryDto categoryDto) {
-        if (categoryRepository.findByName(categoryDto.getName()).isPresent()) {
-            throw new ConflictException("category already exist");
-        }
-        return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
+        return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
     }
 
     @Transactional
     @Override
     public void deleteCategory(Long id) {
+        if (!eventRepository.findAllByCategoryId(id).isEmpty()) {
+            throw new BadRequestException("only category without event can be delete");
+        }
         categoryRepository.delete(getAndCheckCategory(id));
     }
 

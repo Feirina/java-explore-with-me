@@ -2,7 +2,7 @@ package ru.practicum.ewm_main.user.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
@@ -12,9 +12,9 @@ import javax.validation.constraints.NotEmpty;
 public class UserDto {
     private Long id;
 
-    @NotEmpty
+    @NotBlank
     private String name;
 
-    @NotEmpty
+    @NotBlank
     private String email;
 }

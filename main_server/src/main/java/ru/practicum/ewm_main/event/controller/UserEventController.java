@@ -10,6 +10,7 @@ import ru.practicum.ewm_main.event.service.EventService;
 import ru.practicum.ewm_main.participation.dto.ParticipationDto;
 import ru.practicum.ewm_main.participation.service.ParticipationService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class UserEventController {
 
     @PostMapping
     public EventDto createEvent(@PathVariable Long userId,
-                                @RequestBody NewEventDto eventDto) {
+                                @Valid @RequestBody NewEventDto eventDto) {
         log.info("create event by user with id {}", userId);
         return eventService.createEvent(userId, eventDto);
     }

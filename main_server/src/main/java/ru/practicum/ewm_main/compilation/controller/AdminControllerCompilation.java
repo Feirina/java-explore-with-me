@@ -6,6 +6,8 @@ import ru.practicum.ewm_main.compilation.dto.CompilationDto;
 import ru.practicum.ewm_main.compilation.dto.ShortCompilationDto;
 import ru.practicum.ewm_main.compilation.service.CompilationService;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/admin/compilations")
@@ -17,7 +19,7 @@ public class AdminControllerCompilation {
     }
 
     @PostMapping
-    public CompilationDto createCompilation(@RequestBody ShortCompilationDto compilationDto) {
+    public CompilationDto createCompilation(@Valid @RequestBody ShortCompilationDto compilationDto) {
         log.info("create new compilation");
         return compilationService.createCompilation(compilationDto);
     }

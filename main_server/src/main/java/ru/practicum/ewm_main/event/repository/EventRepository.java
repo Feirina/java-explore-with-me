@@ -10,6 +10,7 @@ import ru.practicum.ewm_main.event.model.State;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+    List<Event> findAllByCategoryId(Long categoryId);
 
     Page<Event> findAllByInitiatorId(Long userId, Pageable pageable);
 

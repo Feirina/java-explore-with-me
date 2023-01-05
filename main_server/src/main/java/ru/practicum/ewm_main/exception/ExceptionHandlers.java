@@ -1,9 +1,11 @@
 package ru.practicum.ewm_main.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
@@ -13,7 +15,7 @@ public class ExceptionHandlers {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleConflictException(final ConflictException e) {
+    public ApiError handleConflictException(final DataIntegrityViolationException e) {
         return new ApiError.ApiErrorBuilder()
                 .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())
@@ -28,7 +30,7 @@ public class ExceptionHandlers {
         return new ApiError.ApiErrorBuilder()
                 .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())
-                .reason("Пользователь не найден " + request.getDescription(false))
+                .reason("Object not found " + request.getDescription(false))
                 .status(HttpStatus.NOT_FOUND)
                 .build();
     }
@@ -36,6 +38,17 @@ public class ExceptionHandlers {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiError handleValidationException(final BadRequestException e, WebRequest request) {
+        return new ApiError.ApiErrorBuilder()
+                .errors(List.of(e.getClass().getName()))
+                .message(e.getLocalizedMessage())
+                .reason(request.getDescription(false))
+                .status(HttpStatus.FORBIDDEN)
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleInternalServerErrorException(final HttpServerErrorException.InternalServerError e, WebRequest request) {
         return new ApiError.ApiErrorBuilder()
                 .errors(List.of(e.getClass().getName()))
                 .message(e.getLocalizedMessage())

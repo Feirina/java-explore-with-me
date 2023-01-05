@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.category.repository.CategoryRepository;
 import ru.practicum.ewm_main.event.EventMapper;
+import ru.practicum.ewm_main.event.LocationMapper;
 import ru.practicum.ewm_main.event.dto.*;
 import ru.practicum.ewm_main.event.model.Event;
 import ru.practicum.ewm_main.event.model.Location;
@@ -24,9 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm_main.event.EventMapper.toEvent;
-import static ru.practicum.ewm_main.event.EventMapper.toEventDto;
-import static ru.practicum.ewm_main.event.LocationMapper.toLocation;
 import static ru.practicum.ewm_main.event.model.State.*;
 import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 
@@ -101,7 +99,7 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("event must be published");
         }
         incrementViews(id);
-        return setConfirmedRequests(toEventDto(event));
+        return setConfirmedRequests(EventMapper.toEventDto(event));
     }
 
     @Override
@@ -130,10 +128,10 @@ public class EventServiceImpl implements EventService {
                     .orElseThrow(() -> new NotFoundException("category not found")));
         }
         Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
-        LocalDateTime date = LocalDateTime.parse(eventDto.getEventDate(),
-                DATE_TIME_FORMATTER);
         if (eventDto.getEventDate() != null) {
-            if (date.isBefore(LocalDateTime.now().minusHours(2))) {
+            LocalDateTime date = LocalDateTime.parse(eventDto.getEventDate(),
+                    DATE_TIME_FORMATTER);
+            if (date.isBefore(LocalDateTime.now().plusHours(2))) {
                 throw new BadRequestException("date event is too late");
             }
             event.setEventDate(date);
@@ -144,7 +142,7 @@ public class EventServiceImpl implements EventService {
         if (event.getState().equals(CANCELED)) {
             event.setState(PENDING);
         }
-        EventDto returnEventDto = toEventDto(eventRepository.save(event));
+        EventDto returnEventDto = EventMapper.toEventDto(eventRepository.save(event));
         return setConfirmedRequests(returnEventDto);
     }
 
@@ -152,16 +150,16 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto createEvent(Long userId, NewEventDto eventDto) {
         User user = checkAndGetUser(userId);
-        Event event = toEvent(eventDto);
-        if (event.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
+        Event event = EventMapper.toEvent(eventDto);
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("date event is too late");
         }
-        Location location = locationRepository.save(toLocation(eventDto.getLocation()));
+        Location location = locationRepository.save(LocationMapper.toLocation(eventDto.getLocation()));
         event.setCategory(categoryRepository.findById(eventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("category not found")));
         event.setLocation(location);
         event.setInitiator(user);
-        return toEventDto(eventRepository.save(event));
+        return EventMapper.toEventDto(eventRepository.save(event));
     }
 
     @Override
@@ -170,7 +168,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getInitiator().getId().equals(userId)) {
             throw new BadRequestException("only initiator can get fullEventDto");
         }
-        return setConfirmedRequests(toEventDto(event));
+        return setConfirmedRequests(EventMapper.toEventDto(event));
     }
 
     @Transactional
@@ -184,7 +182,7 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("only pending event can be canceled");
         }
         event.setState(CANCELED);
-        EventDto eventDto = toEventDto(eventRepository.save(event));
+        EventDto eventDto = EventMapper.toEventDto(eventRepository.save(event));
         return setConfirmedRequests(eventDto);
     }
 
@@ -221,14 +219,14 @@ public class EventServiceImpl implements EventService {
             event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(), DATE_TIME_FORMATTER));
         }
         if (eventDto.getLocation() != null) {
-            Location location = locationRepository.save(toLocation(eventDto.getLocation()));
+            Location location = locationRepository.save(LocationMapper.toLocation(eventDto.getLocation()));
             event.setLocation(location);
         }
         Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
         Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
         Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
         Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
-        EventDto returnEventDto = toEventDto(eventRepository.save(event));
+        EventDto returnEventDto = EventMapper.toEventDto(eventRepository.save(event));
         return setConfirmedRequests(returnEventDto);
     }
 
@@ -236,14 +234,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto publishEvent(Long eventId) {
         Event event = checkAndGetEvent(eventId);
-        if (event.getEventDate().isBefore(LocalDateTime.now().minusHours(1))) {
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
             throw new BadRequestException("event must start min after one hour of now");
         }
         if (!event.getState().equals(PENDING)) {
             throw new BadRequestException("state of event must be PENDING");
         }
         event.setState(PUBLISHED);
-        EventDto eventDto = toEventDto(eventRepository.save(event));
+        EventDto eventDto = EventMapper.toEventDto(eventRepository.save(event));
         return setConfirmedRequests(eventDto);
     }
 
@@ -252,7 +250,7 @@ public class EventServiceImpl implements EventService {
     public EventDto rejectEvent(Long eventId) {
         Event event = checkAndGetEvent(eventId);
         event.setState(CANCELED);
-        EventDto eventDto = toEventDto(eventRepository.save(event));
+        EventDto eventDto = EventMapper.toEventDto(eventRepository.save(event));
         return setConfirmedRequests(eventDto);
     }
 
