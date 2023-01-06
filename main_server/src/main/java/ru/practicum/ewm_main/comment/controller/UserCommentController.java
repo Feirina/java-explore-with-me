@@ -45,8 +45,8 @@ public class UserCommentController {
 
     @GetMapping
     public List<CommentDto> getAllCommentsByUser(@PathVariable Long userId,
-                                                 @RequestParam int from,
-                                                 @RequestParam int size) {
+                                                 @RequestParam (defaultValue = "0") int from,
+                                                 @RequestParam (defaultValue = "10") int size) {
         log.info("get all user {} comments", userId);
         return commentService.getAllCommentsByUser(userId, from, size);
     }
