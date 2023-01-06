@@ -18,8 +18,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.ewm_main.comment.CommentMapper.toComment;
 import static ru.practicum.ewm_main.comment.CommentMapper.toCommentDto;
-import static ru.practicum.ewm_main.comment.model.CommentState.APPROVED;
-import static ru.practicum.ewm_main.comment.model.CommentState.REJECTED;
+import static ru.practicum.ewm_main.comment.model.CommentState.*;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -51,6 +50,7 @@ public class CommentServiceImpl implements CommentService {
             throw new BadRequestException("only author can change comment");
         }
         comment.setText(commentDto.getText());
+        comment.setState(NEW);
         return toCommentDto(commentRepository.save(comment));
     }
 
