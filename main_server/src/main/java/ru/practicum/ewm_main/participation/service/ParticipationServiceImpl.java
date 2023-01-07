@@ -82,11 +82,7 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public List<ParticipationDto> getParticipationRequests(Long eventId, Long userId) {
-        Event event = checkAndGetEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new BadRequestException("only initiator of event can reject participation request to this event");
-        }
-        return participationRepository.findAllByEventId(eventId)
+        return participationRepository.findAllByEventIdAndEventInitiatorId(eventId, userId)
                 .stream()
                 .map(ParticipationMapper::toParticipationDto)
                 .collect(Collectors.toList());
@@ -95,15 +91,9 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Transactional
     @Override
     public ParticipationDto confirmParticipationRequest(Long eventId, Long userId, Long reqId) {
-        Participation participation = participationRepository.findById(reqId)
-                .orElseThrow(() -> new NotFoundException("participation request with id = " + reqId + " not found"));
+        Participation participation = checkAndGetParticipation(reqId);
         Event event = checkAndGetEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new BadRequestException("only initiator of event can reject participation request to this event");
-        }
-        if (!eventId.equals(participation.getEvent().getId())) {
-            throw new BadRequestException("eventId not equals eventId of participation request");
-        }
+        equalsOfParameters(userId, event, participation);
         if (!participation.getStatus().equals(PENDING)) {
             throw new BadRequestException("only participation request with status pending can be approval");
         }
@@ -118,21 +108,29 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Transactional
     @Override
     public ParticipationDto rejectParticipationRequest(Long eventId, Long userId, Long reqId) {
-        Participation participation = participationRepository.findById(reqId)
-                .orElseThrow(() -> new NotFoundException("participation request with id = " + reqId + " not found"));
+        Participation participation = checkAndGetParticipation(reqId);
         Event event = checkAndGetEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new BadRequestException("only initiator of event can reject request to this event");
-        }
-        if (!eventId.equals(participation.getEvent().getId())) {
-            throw new BadRequestException("eventId not equals eventId of participation request");
-        }
+        equalsOfParameters(userId, event, participation);
         participation.setStatus(REJECTED);
         return ParticipationMapper.toParticipationDto(participationRepository.save(participation));
+    }
+
+    private Participation checkAndGetParticipation(Long id) {
+        return participationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("participation request with id = " + id + " not found"));
     }
 
     private Event checkAndGetEvent(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("event with id = " + id + " not found"));
+    }
+
+    private void equalsOfParameters(Long userId, Event event, Participation participation) {
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new BadRequestException("only initiator of event can confirm or reject participation request to this event");
+        }
+        if (!event.getId().equals(participation.getEvent().getId())) {
+            throw new BadRequestException("eventId not equals eventId of participation request");
+        }
     }
 }
