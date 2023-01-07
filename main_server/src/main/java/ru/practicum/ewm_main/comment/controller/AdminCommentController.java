@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm_main.comment.dto.CommentDto;
 import ru.practicum.ewm_main.comment.service.CommentService;
 
+import javax.validation.constraints.Positive;
+
 @Slf4j
 @RestController
 @RequestMapping("/admin/comments")
@@ -19,13 +21,13 @@ public class AdminCommentController {
     }
 
     @PatchMapping("/{commentId}/approve")
-    public CommentDto approveComment(@PathVariable Long commentId) {
+    public CommentDto approveComment(@Positive @PathVariable Long commentId) {
         log.info("approve comment {}", commentId);
         return commentService.approveComment(commentId);
     }
 
     @PatchMapping("/{commentId}/reject")
-    public CommentDto rejectComment(@PathVariable Long commentId) {
+    public CommentDto rejectComment(@Positive @PathVariable Long commentId) {
         log.info("reject comment {}", commentId);
         return commentService.rejectComment(commentId);
     }

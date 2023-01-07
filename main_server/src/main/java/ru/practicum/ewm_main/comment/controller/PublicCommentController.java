@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm_main.comment.dto.CommentDto;
 import ru.practicum.ewm_main.comment.service.CommentService;
 
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @Slf4j
@@ -18,7 +19,7 @@ public class PublicCommentController {
     }
 
     @GetMapping
-    public List<CommentDto> getAllCommentsForEvent(@PathVariable Long eventId,
+    public List<CommentDto> getAllCommentsForEvent(@Positive @PathVariable Long eventId,
                                                    @RequestParam (defaultValue = "0") int from,
                                                    @RequestParam (defaultValue = "10") int size) {
         log.info("get all comments for event {}", eventId);

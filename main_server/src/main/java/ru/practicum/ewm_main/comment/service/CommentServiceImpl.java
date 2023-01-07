@@ -2,6 +2,7 @@ package ru.practicum.ewm_main.comment.service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm_main.comment.CommentMapper;
 import ru.practicum.ewm_main.comment.dto.CommentDto;
 import ru.practicum.ewm_main.comment.model.Comment;
@@ -21,6 +22,7 @@ import static ru.practicum.ewm_main.comment.CommentMapper.toCommentDto;
 import static ru.practicum.ewm_main.comment.model.CommentState.*;
 
 @Service
+@Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -33,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto createComment(CommentDto commentDto, Long userId, Long eventId) {
         User user = checkAndGetUser(userId);
         Event event = checkAndGetEvent(eventId);
@@ -43,24 +46,20 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto updateComment(Long commentId, Long userId, CommentDto commentDto) {
-        Comment comment = checkAndGetComment(commentId);
-        User user = checkAndGetUser(userId);
-        if (!comment.getUser().equals(user)) {
-            throw new BadRequestException("only author can change comment");
-        }
+        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+                .orElseThrow(() -> new BadRequestException("only author can change comment"));
         comment.setText(commentDto.getText());
         comment.setState(NEW);
         return toCommentDto(commentRepository.save(comment));
     }
 
     @Override
+    @Transactional
     public void deleteComment(Long commentId, Long userId) {
-        User user = checkAndGetUser(userId);
-        Comment comment = checkAndGetComment(commentId);
-        if (!comment.getUser().equals(user)) {
-            throw new BadRequestException("only author can delete comment");
-        }
+        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+                .orElseThrow(() -> new BadRequestException("only author can delete comment"));
         commentRepository.delete(comment);
     }
 
@@ -83,6 +82,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto approveComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(APPROVED);
@@ -90,6 +90,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto rejectComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(REJECTED);

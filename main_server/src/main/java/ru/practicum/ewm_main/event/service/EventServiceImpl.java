@@ -19,12 +19,12 @@ import ru.practicum.ewm_main.user.model.User;
 import ru.practicum.ewm_main.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.practicum.ewm_main.Constant.DATE_TIME_FORMATTER;
 import static ru.practicum.ewm_main.event.model.State.*;
 import static ru.practicum.ewm_main.participation.model.StatusRequest.CONFIRMED;
 
@@ -36,7 +36,6 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public EventServiceImpl(EventRepository eventRepository, ParticipationRepository participationRepository, CategoryRepository categoryRepository, LocationRepository locationRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
