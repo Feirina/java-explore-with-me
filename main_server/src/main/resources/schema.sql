@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS comments (
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     event_id BIGINT REFERENCES events(id) ON DELETE CASCADE,
     created_on TIMESTAMP NOT NULL,
-    state VARCHAR(50)
+    state VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS participations (

@@ -20,7 +20,7 @@ import static ru.practicum.ewm_main.event.model.State.PUBLISHED;
 import static ru.practicum.ewm_main.participation.model.StatusRequest.*;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ParticipationServiceImpl implements ParticipationService {
     private final ParticipationRepository participationRepository;
     private final UserRepository userRepository;
@@ -33,6 +33,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationDto> getParticipationRequests(Long userId) {
         return participationRepository.findAllByRequesterId(userId)
                 .stream()
@@ -40,7 +41,6 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     @Override
     public ParticipationDto createParticipationRequest(Long userId, Long eventId) {
         if (participationRepository.findByEventIdAndRequesterId(eventId, userId) != null) {
@@ -71,7 +71,6 @@ public class ParticipationServiceImpl implements ParticipationService {
         return ParticipationMapper.toParticipationDto(participationRepository.save(participation));
     }
 
-    @Transactional
     @Override
     public ParticipationDto cancelParticipationRequest(Long userId, Long reqId) {
         Participation participation = participationRepository.findByIdAndRequesterId(reqId, userId)
@@ -81,6 +80,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationDto> getParticipationRequests(Long eventId, Long userId) {
         return participationRepository.findAllByEventIdAndEventInitiatorId(eventId, userId)
                 .stream()
@@ -88,7 +88,6 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     @Override
     public ParticipationDto confirmParticipationRequest(Long eventId, Long userId, Long reqId) {
         Participation participation = checkAndGetParticipation(reqId);
@@ -105,7 +104,6 @@ public class ParticipationServiceImpl implements ParticipationService {
         return ParticipationMapper.toParticipationDto(participationRepository.save(participation));
     }
 
-    @Transactional
     @Override
     public ParticipationDto rejectParticipationRequest(Long eventId, Long userId, Long reqId) {
         Participation participation = checkAndGetParticipation(reqId);

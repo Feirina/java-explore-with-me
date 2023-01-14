@@ -22,7 +22,7 @@ import static ru.practicum.ewm_main.comment.CommentMapper.toCommentDto;
 import static ru.practicum.ewm_main.comment.model.CommentState.*;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -35,7 +35,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public CommentDto createComment(CommentDto commentDto, Long userId, Long eventId) {
         User user = checkAndGetUser(userId);
         Event event = checkAndGetEvent(eventId);
@@ -46,7 +45,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public CommentDto updateComment(Long commentId, Long userId, CommentDto commentDto) {
         Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
                 .orElseThrow(() -> new BadRequestException("only author can change comment"));
@@ -56,7 +54,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
                 .orElseThrow(() -> new BadRequestException("only author can delete comment"));
@@ -64,6 +61,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentDto> getAllCommentsForEvent(Long eventId, int from, int size) {
         Event event = checkAndGetEvent(eventId);
         return commentRepository.findAllByEventAndState(event, APPROVED, PageRequest.of(from / size, size))
@@ -73,6 +71,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentDto> getAllCommentsByUser(Long userId, int from, int size) {
         User user = checkAndGetUser(userId);
         return commentRepository.findAllByUser(user, PageRequest.of(from / size, size))
@@ -82,7 +81,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public CommentDto approveComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(APPROVED);
@@ -90,7 +88,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
     public CommentDto rejectComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(REJECTED);
