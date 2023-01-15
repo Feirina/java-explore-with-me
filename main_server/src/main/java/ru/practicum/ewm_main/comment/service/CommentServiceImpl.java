@@ -17,8 +17,6 @@ import ru.practicum.ewm_main.user.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm_main.comment.CommentMapper.toComment;
-import static ru.practicum.ewm_main.comment.CommentMapper.toCommentDto;
 import static ru.practicum.ewm_main.comment.model.CommentState.*;
 
 @Service
@@ -38,10 +36,10 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(CommentDto commentDto, Long userId, Long eventId) {
         User user = checkAndGetUser(userId);
         Event event = checkAndGetEvent(eventId);
-        Comment comment = toComment(commentDto);
+        Comment comment = CommentMapper.toComment(commentDto);
         comment.setUser(user);
         comment.setEvent(event);
-        return toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
@@ -50,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new BadRequestException("only author can change comment"));
         comment.setText(commentDto.getText());
         comment.setState(NEW);
-        return toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
@@ -84,14 +82,14 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto approveComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(APPROVED);
-        return toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
     public CommentDto rejectComment(Long commentId) {
         Comment comment = checkAndGetComment(commentId);
         comment.setState(REJECTED);
-        return toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     private User checkAndGetUser(Long id) {
